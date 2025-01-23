@@ -1,0 +1,103 @@
+/* AddBtn.css */
+
+/* Styles for AddBtn Component */
+
+.container {
+    width: 100%; /* Make the container take the full width of the viewport */
+    max-width: 800px; /* Set a larger maximum width to prevent cutting off content */
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden; /* Ensure no content overflows the container */
+  }
+  
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%; /* Ensure the form takes up the full width of the container */
+  }
+  
+  /* Arrange labels and inputs side by side */
+  form > div {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 15px;
+    flex-wrap: nowrap; /* Prevent wrapping of rows unless on small screens */
+  }
+  
+  label {
+    font-weight: bold;
+    color: #555;
+    flex-shrink: 0;
+    width: 200px; /* Increased width to prevent text cutoff */
+    text-align: left;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="date"] {
+    flex: 1; /* Ensure inputs stretch to fill available space */
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    min-width: 0; /* Prevent inputs from overflowing the container */
+  }
+  
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="date"]:focus {
+    border-color: #007BFF;
+  }
+  
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007BFF;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    align-self: flex-end; /* Align the button to the right */
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 768px) {
+    .container {
+      padding: 15px;
+    }
+  
+    form > div {
+      flex-wrap: wrap; /* Allow rows to wrap on smaller screens */
+    }
+  
+    label {
+      width: 100%; /* Labels take up full width on smaller screens */
+      margin-bottom: 5px;
+      text-align: left;
+    }
+  
+    input[type="text"],
+    input[type="email"],
+    input[type="date"] {
+      width: 100%; /* Inputs take full width on smaller screens */
+    }
+  }
+  

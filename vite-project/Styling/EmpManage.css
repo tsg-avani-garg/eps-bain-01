@@ -1,0 +1,83 @@
+/* Styles for EmpManage Component */
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+  
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .button-container {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .add-btn,
+  .logout-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007BFF;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .add-btn:hover,
+  .logout-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .content-container {
+    margin-top: 20px;
+  }
+  
+  /* Table Styling */
+  .content-container table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  .content-container th,
+  .content-container td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+  
+  .content-container th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  .content-container tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .content-container tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  /* Prevent scrollbar and ensure proper table fitting */
+  .content-container {
+    overflow: hidden;
+  }
+  
+  .content-container table {
+    table-layout: fixed;
+    word-wrap: break-word;
+  }

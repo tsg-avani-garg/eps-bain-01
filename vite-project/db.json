@@ -1,0 +1,105 @@
+{
+    "employees": [
+      {
+        "id": 1,
+        "firstname": "John",
+        "lastname": "Doe",
+        "department": "Engineering",
+        "designation": "Software Engineer",
+        "email": "john.doe@example.com",
+        "phone": "1234567890",
+        "startdate": "2023-05-15"
+      },
+      {
+        "id": 2,
+        "firstname": "Jane",
+        "lastname": "Smith",
+        "department": "Human Resources",
+        "designation": "HR Manager",
+        "email": "jane.smith@example.com",
+        "phone": "9876543210",
+        "startdate": "2024-11-15"
+      },
+      {
+        "id": 3,
+        "firstname": "Alice",
+        "lastname": "Brown",
+        "department": "Marketing",
+        "designation": "Marketing Specialist",
+        "email": "alice.brown@example.com",
+        "phone": "5678901234",
+        "startdate": "2022-07-20"
+      },
+      {
+        "id": 4,
+        "firstname": "Bob",
+        "lastname": "Johnson",
+        "department": "Finance",
+        "designation": "Financial Analyst",
+        "email": "bob.johnson@example.com",
+        "phone": "3456789012",
+        "startdate": "2023-01-10"
+      },
+      {
+        "id": 5,
+        "firstname": "Chris",
+        "lastname": "Taylor",
+        "department": "Engineering",
+        "designation": "DevOps Engineer",
+        "email": "chris.taylor@example.com",
+        "phone": "4567890123",
+        "startdate": "2023-06-01"
+      },
+      {
+        "id": 6,
+        "firstname": "Ella",
+        "lastname": "Davis",
+        "department": "Customer Support",
+        "designation": "Support Specialist",
+        "email": "ella.davis@example.com",
+        "phone": "8901234567",
+        "startdate": "2023-09-25"
+      },
+      {
+        "id": 7,
+        "firstname": "Michael",
+        "lastname": "Wilson",
+        "department": "Engineering",
+        "designation": "Backend Developer",
+        "email": "michael.wilson@example.com",
+        "phone": "1230984567",
+        "startdate": "2023-03-30"
+      },
+      {
+        "id": 8,
+        "firstname": "Sophia",
+        "lastname": "Martinez",
+        "department": "Design",
+        "designation": "UI/UX Designer",
+        "email": "sophia.martinez@example.com",
+        "phone": "3216549870",
+        "startdate": "2022-12-05"
+      },
+      {
+        "id": 9,
+        "firstname": "David",
+        "lastname": "Anderson",
+        "department": "Legal",
+        "designation": "Legal Advisor",
+        "email": "david.anderson@example.com",
+        "phone": "6543210987",
+        "startdate": "2024-01-15"
+      },
+      {
+        "id": 10,
+        "firstname": "Emma",
+        "lastname": "Thomas",
+        "department": "IT",
+        "designation": "IT Support Specialist",
+        "email": "emma.thomas@example.com",
+        "phone": "7654321098",
+        "startdate": "2024-02-01"
+      }
+    ]
+  }
+  
