@@ -8,7 +8,7 @@ export const AddBtn = () => {
     lastname: "",
     department: "",
     designation: "",
-    email: "",
+    username: "",
     phone: "",
     startdate: "",
   });
@@ -36,7 +36,7 @@ export const AddBtn = () => {
         lastname: "",
         department: "",
         designation: "",
-        email: "",
+        username: "",
         phone: "",
         startdate: "",
       });
@@ -88,9 +88,9 @@ export const AddBtn = () => {
 
         <label htmlFor="email">Email:</label>
         <input
-          type="email"
-          placeholder="Enter your Email"
-          name="email"
+          type="text"
+          placeholder="Enter your Username"
+          name="username"
           onChange={handleChange}
           value={values.email}
         />

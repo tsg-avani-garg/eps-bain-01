@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import React from "react";
 import axios from "axios";
-import { SearchBar } from "./SearchBar"; // Import the SearchBar component
+import { SearchBar } from "./SearchBar";
+import { EditModal } from "./EditModal"; // Import the modal component
 import "../Styling/CreateTable.css";
 
 export const CreateTable = () => {
@@ -9,8 +10,24 @@ export const CreateTable = () => {
   const [data, setData] = useState([]); // State to store full data
   const [loading, setLoading] = useState(true); // State for loading indicator
   const [error, setError] = useState(null); // State for error handling
-  const [editing, setEditing] = useState(null); // State to track which row is being edited
-  const [editedData, setEditedData] = useState({}); // State to store edited row data
+  const [userRole, setUserRole] = useState(""); // Store logged-in user role
+  const [username, setUsername] = useState(""); // Store logged-in username
+  const [showModal, setShowModal] = useState(false); // Track modal visibility
+  const [selectedUser, setSelectedUser] = useState(null); // Track selected user for editing
+
+  // Fetch user details (role and username) from the token
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = JSON.parse(atob(token.split(".")[1])); // Decode JWT payload
+        setUserRole(decoded.role); // Extract role
+        setUsername(decoded.username); // Extract username
+      } catch (err) {
+        console.error("Error decoding token:", err);
+      }
+    }
+  }, []);
 
   // Fetch data when the component loads
   useEffect(() => {
@@ -29,32 +46,19 @@ export const CreateTable = () => {
   }, []);
 
   const handleEditClick = (user) => {
-    setEditing(user._id);
-    setEditedData(user);
-  };
-
-  const handleChange = (e) => {
-    setEditedData({ ...editedData, [e.target.name]: e.target.value });
-  };
-
-  const handleSaveClick = async () => {
-    try {
-      await axios.put(`http://127.0.0.1:8000/update-details/${editing}`, editedData);
-
-      const updatedData = data.map((item) =>
-        item._id === editing ? editedData : item
-      );
-      setData(updatedData);
-      setFilteredData(updatedData); // Update the filtered data
-      setEditing(null);
-      alert("Details updated successfully!");
-    } catch (err) {
-      console.error("Error updating data:", err);
-      alert("Failed to update details. Please try again.");
+    if (user.username === username || userRole === "admin") {
+      setSelectedUser(user); // Set the selected user for editing
+      setShowModal(true); // Show the modal
+    } else {
+      alert("Access denied: You can only edit your own details or must be an admin.");
     }
   };
 
   const handleDeleteClick = async (id) => {
+    if (userRole === "employee") {
+      alert("You are not authorized to delete the record.");
+      return;
+    }
     try {
       await axios.delete(`http://127.0.0.1:8000/delete-details/${id}`);
       const updatedData = data.filter((item) => item._id !== id);
@@ -83,7 +87,6 @@ export const CreateTable = () => {
     <div className="table-container">
       <h2>Employee Details</h2>
 
-      {/* Replace manual search bar with SearchBar.jsx */}
       <SearchBar setFilteredData={handleSearch} />
 
       <table className="styled-table">
@@ -94,7 +97,7 @@ export const CreateTable = () => {
             <th>Last Name</th>
             <th>Department</th>
             <th>Designation</th>
-            <th>Email</th>
+            <th>Username</th>
             <th>Contact Number</th>
             <th>Start Date</th>
             <th>Action</th>
@@ -103,109 +106,57 @@ export const CreateTable = () => {
         <tbody>
           {filteredData.map((user) => (
             <tr key={user._id}>
-              {editing === user._id ? (
-                <>
-                  {/* Editable Row */}
-                  <td>{user._id}</td>
-                  <td>
-                    <input
-                      type="text"
-                      name="firstname"
-                      value={editedData.firstname}
-                      onChange={handleChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      name="lastname"
-                      value={editedData.lastname}
-                      onChange={handleChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      name="department"
-                      value={editedData.department}
-                      onChange={handleChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      name="designation"
-                      value={editedData.designation}
-                      onChange={handleChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="email"
-                      name="email"
-                      value={editedData.email}
-                      onChange={handleChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      name="phone"
-                      value={editedData.phone}
-                      onChange={handleChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="date"
-                      name="startdate"
-                      value={editedData.startdate}
-                      onChange={handleChange}
-                    />
-                  </td>
-                  <td>
-                    <button className="save-btn" onClick={handleSaveClick}>
-                      Save
-                    </button>
-                    <button
-                      className="cancel-btn"
-                      onClick={() => setEditing(null)}
-                    >
-                      Cancel
-                    </button>
-                  </td>
-                </>
+              <td>{user._id}</td>
+              <td>{user.firstname}</td>
+              <td>{user.lastname}</td>
+              <td>{user.department}</td>
+              <td>{user.designation}</td>
+              <td>{user.username}</td>
+              {/* Show Contact Number only if username matches or user is an admin */}
+              {(user.username === username || userRole === "admin") ? (
+                <td>{user.phone}</td>
               ) : (
-                <>
-                  {/* Non-Editable Row */}
-                  <td>{user._id}</td>
-                  <td>{user.firstname}</td>
-                  <td>{user.lastname}</td>
-                  <td>{user.department}</td>
-                  <td>{user.designation}</td>
-                  <td>{user.email}</td>
-                  <td>{user.phone}</td>
-                  <td>{user.startdate}</td>
-                  <td>
-                    <button
-                      className="edit-btn"
-                      onClick={() => handleEditClick(user)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleDeleteClick(user._id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </>
+                <td>Hidden</td>
               )}
+              <td>{user.startdate}</td>
+              <td>
+                {/* Allow edit if username matches or user is admin */}
+                {user.username === username || userRole === "admin" ? (
+                  <button
+                    className="edit-btn"
+                    onClick={() => handleEditClick(user)}
+                  >
+                    Edit
+                  </button>
+                ) : (
+                  <button className="edit-btn" disabled>
+                    No Access
+                  </button>
+                )}
+                {/* Show delete button only for admins */}
+                {userRole === "admin" && (
+                  <button
+                    className="delete-btn"
+                    onClick={() => handleDeleteClick(user._id)}
+                  >
+                    Delete
+                  </button>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* Render Modal */}
+      {showModal && (
+        <EditModal
+          user={selectedUser}
+          onClose={() => setShowModal(false)}
+          isAdmin={userRole === "admin"}
+          username={username}
+        />
+      )}
     </div>
   );
 };

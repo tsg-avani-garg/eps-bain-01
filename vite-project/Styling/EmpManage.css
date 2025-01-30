@@ -2,7 +2,7 @@
 
 .container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 100%;
     margin: 20px auto;
     padding: 20px;
     background-color: #f9f9f9;
@@ -49,6 +49,7 @@
     border-collapse: collapse;
     background-color: #fff;
     border-radius: 5px;
+    table-layout: auto; 
     overflow: hidden;
   }
   

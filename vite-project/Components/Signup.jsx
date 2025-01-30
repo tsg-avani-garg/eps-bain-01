@@ -1,30 +1,65 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
 import axios from "axios";
 
-export default function Signup({ toggleLogin }) {
-  const [username, setUsername] = useState(""); // Changed from email to username
+export default function Signup() {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState("option1");
-    const navigate = useNavigate();
+  const [role, setRole] = useState("employee"); // Default role set to employee
+  const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+
+  const validateEmail = (email) => {
+    return /\S+@\S+\.\S+/.test(email);
+  };
+
+  const validatePassword = (password) => {
+    return (
+      password.length >= 8 &&
+      /[A-Z]/.test(password) &&
+      /[a-z]/.test(password) &&
+      /[0-9]/.test(password) &&
+      /[^A-Za-z0-9]/.test(password)
+    );
+  };
+
   const handleSignup = async (e) => {
     e.preventDefault();
-  
+
+    let validationErrors = {};
+
+    if (!username) {
+      validationErrors.username = "Email is required.";
+    } else if (!validateEmail(username)) {
+      validationErrors.username = "Invalid email format.";
+    }
+
+    if (!password) {
+      validationErrors.password = "Password is required.";
+    } else if (!validatePassword(password)) {
+      validationErrors.password =
+        "Password must be at least 8 characters, contain uppercase, lowercase, a number, and a special character.";
+    }
+
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      validationErrors.confirmPassword = "Passwords do not match.";
+    }
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
-  
+
     try {
       const response = await axios.post("http://127.0.0.1:8000/register", {
         username,
-        password // Hardcoded role value
+        password,
+        role,
       });
       console.log("Signup successful:", response.data);
-      navigate("/add-details");
-      // Handle success (e.g., redirect, show success message)
+      alert("Signup successful.");
+      navigate("/login");
     } catch (error) {
       console.error("Signup error:", error.response?.data || error.message);
       alert("Signup failed. Please check your details.");
@@ -36,38 +71,45 @@ export default function Signup({ toggleLogin }) {
       <h2>Signup Form</h2>
       <form onSubmit={handleSignup}>
         <input
-          type="text" // Changed from "email" to "text"
-          placeholder="Username" // Changed placeholder from "Email" to "Username"
-          value={username} // Updated to bind to the username state
+          type="Email"
+          placeholder="Email"
+          value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
+        {errors.username && <p className="error">{errors.username}</p>}
+
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        {errors.password && <p className="error">{errors.password}</p>}
+
         <input
           type="password"
           placeholder="Confirm Password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
-        <label htmlFor="options">Choose your Role:</label>
+        {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
+
+        <label htmlFor="role">Choose your Role:</label>
         <select
-          id="options"
-          name="options"
+          id="role"
+          name="role"
           value={role}
           onChange={(e) => setRole(e.target.value)}
         >
-          <option value="option1">Employee</option>
-          {/* <option value="option2">Admin</option> */}
+          <option value="employee">Employee</option>
         </select>
+
         <button type="submit" className="button">Register</button>
       </form>
+
       <p>
         Already a Member?{" "}
-        <span className="link" onClick={toggleLogin}>
+        <span className="link" onClick={() => navigate("/login")}>
           Login here
         </span>
       </p>

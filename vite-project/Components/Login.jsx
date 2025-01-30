@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { jwtDecode as jwt_decode } from "jwt-decode";
-import { EmpManage } from "./EmpManage";
+import {jwtDecode as jwt_decode} from "jwt-decode"; // Corrected import
+import "../Styling/Login.css";
 
-export default function Login({ toggleSignup }) {
-  const [username, setUsername] = useState(""); // Changed from email to username
+export default function Login() {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -16,28 +16,42 @@ export default function Login({ toggleSignup }) {
         username,
         password,
       });
-      console.log("Login successful:", response.data);
 
-      // Assuming you receive a token in the response
+      console.log("Login successful:", response.data);
       const { token } = response.data;
-      localStorage.setItem("token", token); // Store the token in localStorage
+      
+      // Store token in localStorage
+      localStorage.setItem("token", token);
+
+      // Decode token to extract user details
       const decoded = jwt_decode(token);
       console.log("Decoded token:", decoded);
 
-      if (decoded.role === "admin") {
-        // Navigate to add-details if the user is an admin
-        navigate("/add-details");
-      } else if (decoded.role === "employee") {
-        // Navigate to another page if the user is an employee
-        navigate("/add-details?mode=employee"); // Replace with the desired employee route
-      } else {
-        // Handle unexpected roles
-        alert("Unauthorized role. Please contact support.");
-        localStorage.removeItem("token"); // Clear the token if the role is invalid
+      // Store username and role for easy access
+      localStorage.setItem("username", decoded.username);
+      localStorage.setItem("role", decoded.role);
+
+      // Check token expiration
+      const currentTime = Date.now() / 1000;
+      if (decoded.exp < currentTime) {
+        alert("Session expired. Please log in again.");
+        localStorage.clear();
+        navigate("/login");
+        return;
       }
+
+      // Role-based redirection
+      if (decoded.role === "admin") {
+        navigate("/add-details"); // Full access for admin
+      } else if (decoded.role === "employee") {
+        navigate("/add-details?mode=employee"); // Limited access for employees
+      } else {
+        alert("Unauthorized role. Please contact support.");
+        localStorage.clear();
+      }
+
     } catch (error) {
       console.error("Login error:", error.response?.data || error.message);
-      // Show an error message to the user
       alert("Login failed. Please check your username and password.");
     }
   };
@@ -47,23 +61,25 @@ export default function Login({ toggleSignup }) {
       <h2>Login Form</h2>
       <form onSubmit={handleLogin}>
         <input
-          type="text" // Changed from "email" to "text"
-          placeholder="Username" // Changed from "Email" to "Username"
-          value={username} // Updated to bind to the username state
+          type="text"
+          placeholder="Username"
+          value={username}
           onChange={(e) => setUsername(e.target.value)}
+          required
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
         <a href="#">Forgot password</a>
         <button type="submit" className="button">Login</button>
       </form>
       <p>
         Not a Member?{" "}
-        <span className="link" onClick={toggleSignup}>
+        <span className="link" onClick={() => navigate("/register")}>
           Signup now
         </span>
       </p>
