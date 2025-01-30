@@ -1,7 +1,7 @@
-from fastapi import FastAPI,HTTPException,Depends,Query,Request
+from fastapi import FastAPI,HTTPException,Depends,Query,Request,Security
 from typing import List
 from . import schemas
-from . import model
+# from . import model
 from .database import collection
 from .database import add_collection
 from .database import audit_collection
@@ -10,8 +10,12 @@ import secrets
 import jwt
 from datetime import datetime, timedelta
 from fastapi.middleware.cors import CORSMiddleware
-
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from bson import ObjectId  # Import ObjectId for handling MongoDB IDs
+
+security = HTTPBearer()  
+
+
 
 def transform_mongo_document(doc):
     """Convert MongoDB document _id to a string and return the cleaned document."""
@@ -19,8 +23,20 @@ def transform_mongo_document(doc):
         doc["_id"] = str(doc["_id"])  # Convert ObjectId to string
     return doc
 
+
+
 SECRET_KEY = secrets.token_urlsafe(32)
 ALGORITHM = "HS256"
+
+def verify_jwt(credentials: HTTPAuthorizationCredentials = Security(security)):
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload  # Returns decoded user data (username, role, etc.)
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 
 def generate_jwt(username: str):
@@ -40,12 +56,6 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-# def get_ist_time():
-#     utc_now = datetime.utcnow()
-#     ist = pytz.timezone("Asia/Kolkata")
-#     return utc_now.replace(tzinfo=pytz.utc).astimezone(ist)
 
 
 
@@ -100,23 +110,8 @@ def login(request: schemas.Login):
   
 
 
-# @app.post("/add-details")
-# async def add_details(details: schemas.addDetails):
-#     if add_collection.find_one({"username": details.username}):
-#         raise HTTPException(
-#             status_code=400,
-#             detail="Username already exists. Please use a different email."
-#         )
-
-#     # Add new record to the add_collection
-#     add_collection.insert_one(details.dict())
-
-#     return {"message": "Details added successfully."}
-
-
-
 @app.get("/get-details")
-async def get_all_details():
+async def get_all_details(user: dict = Depends(verify_jwt)):
     # Fetch all records from the add_collection
     all_data = add_collection.find()
 
@@ -128,26 +123,6 @@ async def get_all_details():
 
     return {"data": transformed_data}
 
-# @app.put("/update-details/{id}")
-# async def update_details(id: str, details: dict):
-#     # Validate the ObjectId
-#     if not ObjectId.is_valid(id):
-#         raise HTTPException(status_code=400, detail="Invalid ID format")
-
-#     # Exclude _id from the details dictionary
-#     if "_id" in details:
-#         del details["_id"]  # Remove _id if it exists in the payload
-
-#     # Find the document by ID and update it
-#     updated_result = add_collection.update_one(
-#         {"_id": ObjectId(id)}, {"$set": details}
-#     )
-
-#     # Check if any document was modified
-#     if updated_result.matched_count == 0:
-#         raise HTTPException(status_code=404, detail="Record not found")
-
-#     return {"message": "Details updated successfully"}
 
 
 @app.delete("/delete-details/{id}")
@@ -198,44 +173,6 @@ async def search_details(query: str = Query(..., description="Search query for f
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-
-
-# @app.post("/upsert-details")
-# async def upsert_details(details: schemas.addDetails):
-#     """
-#     Upsert (Update if exists, Insert if not) details in add_collection.
-#     If the username exists, update it. If not, insert a new record.
-#     """
-#     try:
-#         # Convert Pydantic model to dictionary
-#         details_dict = details.dict()
-
-#         # Ensure _id is not present in the update dictionary
-#         if "_id" in details_dict:
-#             del details_dict["_id"]
-
-#         # Perform upsert (Update if exists, Insert if not)
-#         result = add_collection.update_one(
-#             {"username": details.username},  # Condition: Search by username
-#             {"$set": details_dict},  # Correct syntax for updating fields
-#             upsert=True  # If no match is found, insert a new document
-#         )
-
-#         audit_collection.insert_one({
-#             "record_id": details.username,  # Track by username
-#             "changed_by": details.username,  # Username of person making change
-#             "timestamp": datetime.utcnow(),
-#             "changes": details_dict
-#         })
-
-#         if result.upserted_id:
-#             return {"message": "New entry added successfully", "id": str(result.upserted_id)}
-#         else:
-#             return {"message": "Details updated successfully"}
-
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-
 
 
 

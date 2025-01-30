@@ -29,6 +29,7 @@ export default function Login() {
 
       // Store username and role for easy access
       localStorage.setItem("username", decoded.username);
+      console.log(decoded.username);
       localStorage.setItem("role", decoded.role);
 
       // Check token expiration

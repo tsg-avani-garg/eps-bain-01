@@ -2,68 +2,82 @@ import { useState, useEffect } from "react";
 import React from "react";
 import axios from "axios";
 import { SearchBar } from "./SearchBar";
-import { EditModal } from "./EditModal"; // Import the modal component
+import { EditModal } from "./EditModal"; 
 import "../Styling/CreateTable.css";
 
 export const CreateTable = () => {
-  const [filteredData, setFilteredData] = useState([]); // State to store filtered data
-  const [data, setData] = useState([]); // State to store full data
-  const [loading, setLoading] = useState(true); // State for loading indicator
-  const [error, setError] = useState(null); // State for error handling
-  const [userRole, setUserRole] = useState(""); // Store logged-in user role
-  const [username, setUsername] = useState(""); // Store logged-in username
-  const [showModal, setShowModal] = useState(false); // Track modal visibility
-  const [selectedUser, setSelectedUser] = useState(null); // Track selected user for editing
+  const [filteredData, setFilteredData] = useState([]);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [userRole, setUserRole] = useState(""); 
+  const [username, setUsername] = useState(""); 
+  const [showModal, setShowModal] = useState(false); 
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  // Fetch user details (role and username) from the token
+  // ✅ Fetch user details (role and username) from the token
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
         const decoded = JSON.parse(atob(token.split(".")[1])); // Decode JWT payload
-        setUserRole(decoded.role); // Extract role
-        setUsername(decoded.username); // Extract username
+        setUserRole(decoded.role);
+        setUsername(decoded.username);
       } catch (err) {
         console.error("Error decoding token:", err);
       }
     }
   }, []);
 
-  // Fetch data when the component loads
+  // ✅ Fetch Data when the component loads
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/get-details")
-      .then((res) => {
-        setData(res.data.data || []); // Assuming response structure is { data: [...] }
-        setFilteredData(res.data.data || []); // Initialize filtered data with full data
-        setLoading(false);
-      })
-      .catch((err) => {
+    const fetchData = async () => {
+      const token = localStorage.getItem("token"); // ✅ Ensure token is defined
+      if (!token) {
+        console.error("No token found, redirecting to login.");
+        return;
+      }
+
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/get-details", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        setData(response.data.data || []);
+        setFilteredData(response.data.data || []);
+      } catch (err) {
         console.error("Error fetching data:", err);
         setError("Failed to fetch data. Please try again later.");
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const handleEditClick = (user) => {
-    if (user.username === username || userRole === "admin") {
-      setSelectedUser(user); // Set the selected user for editing
-      setShowModal(true); // Show the modal
-    } else {
-      alert("Access denied: You can only edit your own details or must be an admin.");
-    }
-  };
-
+  // ✅ Handle Delete Click
   const handleDeleteClick = async (id) => {
+    const token = localStorage.getItem("token"); // ✅ Get token inside function
+
     if (userRole === "employee") {
       alert("You are not authorized to delete the record.");
       return;
     }
+
+    if (!token) {
+      alert("No token found, please login again.");
+      return;
+    }
+
     try {
-      await axios.delete(`http://127.0.0.1:8000/delete-details/${id}`);
+      await axios.delete(`http://127.0.0.1:8000/delete-details/${id}`, {
+        headers: { Authorization: `Bearer ${token}` } 
+      });
+
       const updatedData = data.filter((item) => item._id !== id);
       setData(updatedData);
-      setFilteredData(updatedData); // Update the filtered data
+      setFilteredData(updatedData);
       alert("Record deleted successfully!");
     } catch (err) {
       console.error("Error deleting data:", err);
@@ -71,8 +85,25 @@ export const CreateTable = () => {
     }
   };
 
-  const handleSearch = (filteredResults) => {
-    setFilteredData(filteredResults); // Update filtered data based on search results
+  // ✅ Handle Search with Token
+  const handleSearch = async (searchQuery) => {
+    const token = localStorage.getItem("token"); // ✅ Ensure token is defined
+
+    if (!token) {
+      alert("No token found, please login again.");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`http://127.0.0.1:8000/search-details?query=${searchQuery}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setFilteredData(response.data.data);
+    } catch (err) {
+      console.error("Error searching:", err);
+      alert("Search failed. Please try again.");
+    }
   };
 
   if (loading) {
@@ -112,7 +143,6 @@ export const CreateTable = () => {
               <td>{user.department}</td>
               <td>{user.designation}</td>
               <td>{user.username}</td>
-              {/* Show Contact Number only if username matches or user is an admin */}
               {(user.username === username || userRole === "admin") ? (
                 <td>{user.phone}</td>
               ) : (
@@ -120,25 +150,15 @@ export const CreateTable = () => {
               )}
               <td>{user.startdate}</td>
               <td>
-                {/* Allow edit if username matches or user is admin */}
                 {user.username === username || userRole === "admin" ? (
-                  <button
-                    className="edit-btn"
-                    onClick={() => handleEditClick(user)}
-                  >
+                  <button className="edit-btn" onClick={() => setSelectedUser(user) || setShowModal(true)}>
                     Edit
                   </button>
                 ) : (
-                  <button className="edit-btn" disabled>
-                    No Access
-                  </button>
+                  <button className="edit-btn" disabled>No Access</button>
                 )}
-                {/* Show delete button only for admins */}
                 {userRole === "admin" && (
-                  <button
-                    className="delete-btn"
-                    onClick={() => handleDeleteClick(user._id)}
-                  >
+                  <button className="delete-btn" onClick={() => handleDeleteClick(user._id)}>
                     Delete
                   </button>
                 )}
@@ -148,7 +168,6 @@ export const CreateTable = () => {
         </tbody>
       </table>
 
-      {/* Render Modal */}
       {showModal && (
         <EditModal
           user={selectedUser}
